@@ -1,17 +1,19 @@
 version: '3'
 
 services:
-   oracledb:
-     image: wnameless/oracle-xe-11g
-     ports:
-      - "1521:1521"
+    oracledb:
+        image: wnameless/oracle-xe-11g-r2
+        ports:
+            - "1521:1521"
 
-   php7-with-oci8:
-     depends_on:
-       - oracledb
-     image: adrianharabula/php7-with-oci8
-     volumes:
-      - ./www:/var/www/html
-     ports:
-      - "8181:80"
+    web:
+        depends_on:
+            - oracledb
+            #     image: adrianharabula/php7-with-oci8
+        build:
+            context: php72
+        volumes:
+            - ./www:/var/www/html
+        ports:
+            - "8181:80"
 
