@@ -1,17 +1,16 @@
 version: '3'
 
 services:
+    # This is a self-contained dev oracle DB.  Default connect: ('system', 'oracle', 'oracledb/XE');
     oracledb:
         image: wnameless/oracle-xe-11g-r2
         ports:
             - "1521:1521"
-
     web:
         depends_on:
             - oracledb
-            #     image: adrianharabula/php7-with-oci8
         build:
-            context: php72
+            context: php73
         volumes:
             - ./www:/var/www/html
         ports:

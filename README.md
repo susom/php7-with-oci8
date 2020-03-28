@@ -1,6 +1,9 @@
-# Latest PHP 7.2 image with Apache and Oracle oci8 (instantclient 19.6.0.0.0)
+# Latest PHP 7.3 image with Apache and Oracle oci8 (instantclient 19.6.0.0.0)
+
+This repo is based on adrianharabula/php7-with-oci8
 
 This image is built from [official PHP images](https://hub.docker.com/_/php/).
+
 It ads oci8 drivers to official image to connect to Oracle database.
 
 A sample fully configured environment with oracle database and php7.1 with
