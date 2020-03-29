@@ -2,6 +2,9 @@
 
 $db_username = "system";
 $db_password = "oracle";
+$db_host     = "oracledb";
+$db_name     = "XE";
+
 $db_dsn      = "oracledb/XE";
 
 // For SID-based connection use this dsn

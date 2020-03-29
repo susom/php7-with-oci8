@@ -13,10 +13,20 @@ RUN apt-get update -qq && \
     libpng-dev \
     libaio1 \
     libzip-dev \
-    && docker-php-ext-install -j$(nproc) gettext zip mysqli \
+    # Postgres
+    libpq5 libpq-dev \
+    && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
+    && docker-php-ext-install -j$(nproc) pgsql pdo_pgsql \
+    # MySql
+    && docker-php-ext-install -j$(nproc) mysqli pdo_mysql \
+    # Other
+    && docker-php-ext-install -j$(nproc) gettext zip \
     && docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ \
     && docker-php-ext-install -j$(nproc) gd \
-    && rm -r /var/lib/apt/lists/*
+    # Clean
+    && apt-get autoremove --purge -y libpq-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/* /tmp/*
 
 # Add apache and php conf from parent
 COPY apache.conf /etc/apache2/conf-enabled/apache.conf
@@ -30,8 +40,8 @@ ADD instantclient/instantclient-sdk-linux.x64-19.6.0.0.0dbru.zip       /tmp/
 ADD instantclient/instantclient-sqlplus-linux.x64-19.6.0.0.0dbru.zip   /tmp/
 
 RUN unzip /tmp/instantclient-basiclite-linux.x64-19.6.0.0.0dbru.zip -d /usr/local/
-RUN unzip /tmp/instantclient-sdk-linux.x64-19.6.0.0.0dbru.zip -d       /usr/local/
-RUN unzip /tmp/instantclient-sqlplus-linux.x64-19.6.0.0.0dbru.zip -d   /usr/local/
+RUN unzip /tmp/instantclient-sdk-linux.x64-19.6.0.0.0dbru.zip       -d /usr/local/
+RUN unzip /tmp/instantclient-sqlplus-linux.x64-19.6.0.0.0dbru.zip   -d /usr/local/
 
 RUN ln -s /usr/local/instantclient_19_6 /usr/local/instantclient
 RUN ln -s /usr/local/instantclient/sqlplus /usr/bin/sqlplus
@@ -39,9 +49,16 @@ RUN ln -s /usr/local/instantclient/sqlplus /usr/bin/sqlplus
 RUN echo 'export LD_LIBRARY_PATH="/usr/local/instantclient/"' >> /root/.bashrc
 RUN echo 'umask 002' >> /root/.bashrc
 
-# SET LOCATION OF PHP.INI AND INSTALL OCI8 EXTENSION
+# OCI8 Installation
 ENV LD_LIBRARY_PATH /usr/local/instantclient/
 RUN pear config-set php_ini /usr/local/etc/php/conf.d/php.ini
 RUN echo 'instantclient,/usr/local/instantclient' | pecl install oci8
+
+# PDO_OCI Installation
+RUN docker-php-ext-configure pdo_oci --with-pdo-oci=instantclient,/usr/local/instantclient
+RUN docker-php-ext-install pdo_oci
+
+# Install Composer
+RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
 
 EXPOSE 80
