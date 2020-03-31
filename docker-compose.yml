@@ -14,5 +14,5 @@ services:
         volumes:
             - ./www:/var/www/html
         ports:
-            - "8181:80"
+            - "${PORT}:80"
 
